@@ -576,7 +576,7 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
         if (_loading) return;
         const levelId = htmlInput.value.trim().replace(/\D/g, "");
         if (!levelId) {
-          _showStatus("enter a level id", "#ff6666", 3000);
+          _showStatus("Enter a level ID!", "#ff6666", 3000);
 
           return;
         }
@@ -585,18 +585,18 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
         try {
           await _doSearchInner(levelId);
         } catch (err) {
-          _showStatus("error: " + err.message, "#ff5555");
+          _showStatus("Error: " + err.message, "#ff5555");
         } finally {
           _loading = false;
           setSearchLoading(false);
         }
       };
       const _doSearchInner = async (levelId) => {
-        _showStatus("fetching level", "#ffb700");
+        _showStatus("Fetching level...", "#ffb700");
 
         const PROXY_BASE = (window._gdProxyUrl || "").replace(/\/$/, "");
         if (!PROXY_BASE) {
-          _showStatus("no proxy configured. set window._gdProxyUrl first.", "#ff0000");
+          _showStatus("No proxy configured. Set window._gdProxyUrl first.", "#ff0000");
           return;
         }
         const formBody = `levelID=${levelId}&secret=Wmfd2893gb7`;
@@ -608,7 +608,7 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
         if (!res.ok) throw new Error(`Proxy returned ${res.status}`);
         const rawResponse = await res.text();
         if (!rawResponse || rawResponse === "-1" || !rawResponse.includes(":")) {
-          _showStatus("level not found from servers. check the id and try again.", "#ff0000");
+          _showStatus("Level not found from servers. Check the ID and try again.", "#ff0000");
           return;
         }
         const gdMap = {};
@@ -627,7 +627,7 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
         const songKey = isCustomSong ? `ng_song_${songIdRaw}` : window.allLevels[officialSongId][0];
         window.currentlevel[0] = songKey;
         window._onlineSongOffset = parseFloat(gdMap["45"] || "0") || 0;
-        _showStatus(`found "${levelName}"${isCustomSong ? ` — loading song #${songIdRaw}...` : ""}`, "#00ff00");
+        _showStatus(`Found "${levelName}"${isCustomSong ? ` — Loading song #${songIdRaw}...` : ""}`, "#00ff00");
         if (isCustomSong) {
           window._onlineSongBuffer = null; 
           window._onlineSongKey    = null;
@@ -647,7 +647,7 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
               const songArtist = (ngMap["4"]  || "Unknown").replace(/:$/, "").trim();
               const songTitle  = (ngMap["2"]  || `Song #${songIdRaw}`).replace(/:$/, "").trim();
               if (songUrl) {
-                _showStatus(`loading "${songTitle}" by ${songArtist}...`, "#00ff00");
+                _showStatus(`Loading "${songTitle}" by ${songArtist}...`, "#00ff00");
                 const audioCtx = this.game.sound.context;
                 if (audioCtx.state === "suspended") await audioCtx.resume();
                 const proxiedUrl = `${PROXY_BASE}/audio-proxy?url=${encodeURIComponent(songUrl)}`;
@@ -678,7 +678,7 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
           window._onlineLevelId,
           [window._onlineSongArtist || "Unknown"]
         ];
-        _showStatus(`loading string for "${levelName}"`, "#00ff00");
+        _showStatus(`Loading string for "${levelName}"...`, "#00ff00");
         this.time.delayedCall(600, () => {
           htmlInput.remove();
           window.removeEventListener("resize", _repositionInput);
