@@ -530,6 +530,48 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
         statusText.setAlpha(1);
       };
       let _loading = false;
+
+      const loadingCircle = this.add.image(
+        inputX + inputW - 18,
+        inputY + inputH / 2,
+        "loadingCircle"
+      )
+      .setScrollFactor(0)
+      .setDepth(106)
+      .setOrigin(0.5)
+      .setScale(0.22)
+      .setAlpha(0)
+      .setVisible(false);
+
+      this._searchOverlayObjects.push(loadingCircle);
+
+      const loadingSpinTimer = this.time.addEvent({
+        delay: 16,
+        loop: true,
+        callback: () => {
+          if (!loadingCircle.scene) {
+            loadingSpinTimer.remove();
+            return;
+          }
+          if (loadingCircle.visible) {
+            loadingCircle.rotation += 0.1;
+          }
+        }
+      });
+
+      this._searchOverlayObjects.push({
+        destroy: () => loadingSpinTimer.remove()
+      });
+
+      const setSearchLoading = (isLoading) => {
+        loadingCircle.setVisible(isLoading);
+        loadingCircle.setAlpha(isLoading ? 0.7 : 0);
+        if (!isLoading) loadingCircle.rotation = 0;
+
+        searchBtn.setVisible(!isLoading);
+        clearSearchBtn.setVisible(!isLoading);
+      };
+
       const _doSearch = async () => {
         if (_loading) return;
         const levelId = htmlInput.value.trim().replace(/\D/g, "");
@@ -539,12 +581,14 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
           return;
         }
         _loading = true;
+        setSearchLoading(true);
         try {
           await _doSearchInner(levelId);
         } catch (err) {
           _showStatus("error: " + err.message, "#ff5555");
         } finally {
           _loading = false;
+          setSearchLoading(false);
         }
       };
       const _doSearchInner = async (levelId) => {
