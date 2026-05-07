@@ -444,9 +444,9 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
       const inputW = 320;
       const inputH = 44;
       const inputX = sw / 2 - inputW / 2;
-      const inputY = sh / 2 - inputH / 2;
+      const inputY = 50;
       const inputBg = this.add.graphics().setScrollFactor(0).setDepth(104);
-      inputBg.fillStyle(0x000000, 0.5);
+      inputBg.fillStyle(0x000000, 0.4);
       inputBg.fillRoundedRect(inputX, inputY, inputW, inputH, 8);
       inputBg.lineStyle(2, 0xffffff, 0.4);
       const canvas = this.sys.game.canvas;
@@ -475,9 +475,27 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
       `;
       document.body.appendChild(htmlInput);
       setTimeout(() => htmlInput.focus(), 50);
-      const placeholderLabel = this.add.bitmapText(sw / 2, inputY + inputH / 2, "bigFont", "Enter a level, user or ID", 18)
-        .setScrollFactor(0).setDepth(105).setOrigin(0.5, 0.5).setTint(0xaaddff);
-      const typedLabel = this.add.bitmapText(sw / 2, inputY + inputH / 2, "bigFont", "", 18)
+
+      const searchBtn = this.add.image(inputX + inputW + 35, inputY + inputH / 2, "GJ_GameSheet03", "GJ_longBtn06_001.png")
+        .setScrollFactor(0).setDepth(104).setInteractive().setScale(0.7);
+      this._makeBouncyButton(searchBtn, 1, () => {
+        _doSearch();
+      }, () => true);
+      
+      const clearSearchBtn = this.add.image(inputX + inputW + searchBtn.width + 20, inputY + inputH / 2, "GJ_GameSheet03", "GJ_longBtn07_001.png")
+        .setScrollFactor(0).setDepth(104).setInteractive().setScale(0.7);
+      this._makeBouncyButton(clearSearchBtn, 1, () => {
+        htmlInput.value = "";
+        placeholderLabel.setVisible(true);
+        typedLabel.setText("");
+      }, () => true);
+
+      const inputContainer = this.add.graphics().setScrollFactor(0).setDepth(103);
+      inputContainer.fillStyle(0x000000,0.4);
+      inputContainer.fillRoundedRect(inputX - 10, inputY - 10, inputW + 145, inputH + 20, 12);
+      const placeholderLabel = this.add.bitmapText(sw / 2, inputY + inputH / 2, "bigFont", "Enter a level, user or ID", 20)
+        .setScrollFactor(0).setDepth(105).setOrigin(0.5, 0.5).setTint(0x6999d8);
+      const typedLabel = this.add.bitmapText(sw / 2, inputY + inputH / 2, "bigFont", "", 20)
         .setScrollFactor(0).setDepth(105).setOrigin(0.5, 0.5).setTint(0xffffff);
       htmlInput.style.color = "transparent";
       htmlInput.style.caretColor = "#ffffff";
