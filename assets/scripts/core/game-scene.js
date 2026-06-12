@@ -2796,22 +2796,16 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
     let { bgHex, groundHex } = this._parseLevelColors(window.currentlevel[2]);
     const drawOverlay = (gfx, colorHex, isEveryEnd = false) => {
       gfx.clear();
-      const rRaw = (colorHex >> 16) & 0xff;
-      const gRaw = (colorHex >> 8)  & 0xff;
-      const bRaw =  colorHex        & 0xff;
-      const topMul = isEveryEnd ? 0.30 : 0.65;
-      const botMul = isEveryEnd ? 0.18 : 0.42;
-      const steps = 60;
-      for (let i = 0; i < steps; i++) {
-        const t = i / (steps - 1);
-        const mul = topMul + (botMul - topMul) * t;
-        const r2 = Math.min(255, Math.round(rRaw * mul));
-        const g2 = Math.min(255, Math.round(gRaw * mul));
-        const b2 = Math.min(255, Math.round(bRaw * mul));
-        gfx.fillStyle((r2 << 16) | (g2 << 8) | b2, 1);
-        const y0 = Math.floor(i * sh / steps);
-        gfx.fillRect(0, y0, sw, Math.ceil(sh / steps) + 1);
-      }
+      const shadeColor = (mul) => {
+        const r = Math.round(((colorHex >> 16) & 0xff) * mul);
+        const g = Math.round(((colorHex >> 8)  & 0xff) * mul);
+        const b = Math.round(( colorHex        & 0xff) * mul);
+        return (r << 16) | (g << 8) | b;
+      };
+      const topColor = isEveryEnd ? shadeColor(0.30) : colorHex;
+      const bottomColor = shadeColor(isEveryEnd ? 0.18 : 0.42);
+      gfx.fillGradientStyle(topColor, topColor, bottomColor, bottomColor, 1);
+      gfx.fillRect(0, 0, sw, sh);
     };
     const isEveryEnd = (levelId) => levelId === "level_99";
     const fadeIn = this.add.graphics().setScrollFactor(0).setDepth(200);
