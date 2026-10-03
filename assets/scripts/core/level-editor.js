@@ -8726,23 +8726,22 @@ _serializeObject(object) {
     });
   }
 
-
   _getEditorLevelWidth() {
-    let furthestX = 0;
+    if (this._editorFurthestX == null) {
+        let furthestX = 0;
 
-    for (const obj of window.levelObjects) {
-        if (!obj) continue;
+        for (const obj of window.levelObjects) {
+            if (!obj) continue;
 
-        const worldX = (obj.x - 15) * 2;
-
-        if (worldX > furthestX) {
-            furthestX = worldX;
+            const worldX = (obj.x-15)*2;
+            furthestX = Math.max(furthestX,worldX);
         }
+
+        this._editorFurthestX = furthestX;
     }
 
-    return Math.max(screenWidth, furthestX + screenWidth/2);
+    return Math.max(screenWidth,this._editorFurthestX+screenWidth/2);
   }
-
 
   _updateEditorTimeline() {
     if (!this._timelineSlider) return;
