@@ -1389,6 +1389,18 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
         const rawData = localStorage.getItem("created_levels");
         const createdLevels = rawData ? JSON.parse(rawData) : [];
 
+        // Geometry Dash's level browser keeps its border art outside the main
+        // panel. These pieces are part of the UI chrome, so keep them in this
+        // menu container and let the panel draw over their inner edges.
+        const borderBottomLeft = this.add.image(0, sh, "GJ_GameSheet03", "GJ_sideArt_001.png")
+            .setScrollFactor(0).setOrigin(0, 1);
+        const borderBottomRight = this.add.image(sw, sh, "GJ_GameSheet03", "GJ_sideArt_001.png")
+            .setScrollFactor(0).setOrigin(1, 1).setFlipX(true);
+        container.add([
+            borderBottomLeft,
+            borderBottomRight
+        ]);
+
         createdLevels.sort((a, b) => {
             const idA = parseInt(a.createdId.replace("local_", "")) || 0;
             const idB = parseInt(b.createdId.replace("local_", "")) || 0;
@@ -1460,7 +1472,27 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
             listContainer.add([bgStripe, separator, nameTxt, revText, lenIcon, lenTxt, songIcon, songTxt, statusIcon, statusTxt, viewBtn, viewTxt]);
         });
         if (createdLevels.length === 0) {
-            container.add(this.add.bitmapText(centerX, tableY + (tableH/2), "bigFont", "No Levels", 30).setOrigin(0.5).setAlpha(0.5));
+            const promptParts = [
+                { text: "Tap ", tint: 0xffffff },
+                { text: "New", tint: 0x42e33d },
+                { text: " to create ", tint: 0xffffff },
+                { text: "a level!", tint: 0x66b8ff }
+            ];
+            const promptContainer = this.add.container(centerX, tableY + (tableH / 2));
+            const promptItems = promptParts.map(part => {
+                const item = this.add.bitmapText(0, 0, "bigFont", part.text, 34)
+                    .setOrigin(0, 0.5)
+                    .setTint(part.tint);
+                promptContainer.add(item);
+                return item;
+            });
+            const promptWidth = promptItems.reduce((total, item) => total + item.displayWidth, 0);
+            let promptX = -promptWidth / 2;
+            promptItems.forEach(item => {
+                item.x = promptX;
+                promptX += item.displayWidth;
+            });
+            container.add(promptContainer);
         }
         const sideFrame = this.textures.getFrame("GJ_WebSheet", "GJ_table_side_001.png");
         const sideScaleY = tableH / sideFrame.height;
@@ -1548,8 +1580,8 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
         });
         container.add(importBtn);
 
-        const backBtn = this.add.image(50, 48, "GJ_GameSheet03", "GJ_arrow_03_001.png")
-            .setScrollFactor(0).setDepth(104).setFlipX(true).setFlipY(true).setRotation(Math.PI).setInteractive();
+        const backBtn = this.add.image(50, 48, "GJ_GameSheet03", "GJ_arrow_01_001.png")
+            .setScrollFactor(0).setDepth(104).setInteractive();
         
         this._makeBouncyButton(backBtn, 1, () => {
           this._closeEditorMenu();
