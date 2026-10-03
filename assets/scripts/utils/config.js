@@ -14,6 +14,8 @@ window.graphicsQuality = graphicsQualityOptions.includes(storedGraphicsQuality)
 if (!graphicsQualityOptions.includes(storedGraphicsQuality)) {
   localStorage.setItem("gd_graphics_quality", "smooth");
 }
+const storedRenderScale = Number(localStorage.getItem("gd_render_scale"));
+window.renderScale = [0.3, 0.5, 0.75, 1, 1.5, 2].includes(storedRenderScale) ? storedRenderScale : 1;
 window.currentPlayer = localStorage.getItem("iconCurrentPlayer") || "player_01";
 window.currentShip   = localStorage.getItem("iconCurrentShip")   || "ship_01";
 window.currentBall   = localStorage.getItem("iconCurrentBall")   || "player_ball_01";

@@ -5648,7 +5648,7 @@ _buildSettingsPopup() {
     const centerX = screenWidth / 2;
     const centerY = screenHeight / 2;
     const panelWidth = 700;
-    const panelHeight = 360;
+    const panelHeight = 450;
     const qualityOptions = [
       { id: "smooth", label: "SMOOTH" },
       { id: "sharp", label: "SHARP" }
@@ -5668,8 +5668,8 @@ _buildSettingsPopup() {
     inner.add(close);
 
     const title = this.add.bitmapText(0, -panelHeight / 2 + 40, "bigFont", "Graphics", 58).setOrigin(0.5);
-    const label = this.add.bitmapText(0, -55, "goldFont", "Texture Quality", 34).setOrigin(0.5);
-    const value = this.add.bitmapText(0, 20, "bigFont", "", 43).setOrigin(0.5);
+    const label = this.add.bitmapText(0, -110, "goldFont", "Texture Quality", 34).setOrigin(0.5);
+    const value = this.add.bitmapText(0, -60, "bigFont", "", 43).setOrigin(0.5);
     inner.add([title, label, value]);
 
     let selectedIndex = qualityOptions.findIndex(option => option.id === window.graphicsQuality);
@@ -5677,9 +5677,31 @@ _buildSettingsPopup() {
     const updateValue = () => value.setText(qualityOptions[selectedIndex].label);
     updateValue();
 
-    const leftArrow = this.add.image(-200, 20, "GJ_GameSheet03", "GJ_arrow_01_001.png").setInteractive().setScale(0.8);
-    const rightArrow = this.add.image(200, 20, "GJ_GameSheet03", "GJ_arrow_01_001.png").setFlipX(true).setInteractive().setScale(0.8);
+    const leftArrow = this.add.image(-200, -60, "GJ_GameSheet03", "GJ_arrow_01_001.png").setInteractive().setScale(0.8);
+    const rightArrow = this.add.image(200, -60, "GJ_GameSheet03", "GJ_arrow_01_001.png").setFlipX(true).setInteractive().setScale(0.8);
     inner.add([leftArrow, rightArrow]);
+
+    const resolutions = [0.3, 0.5, 0.75, 1, 1.5, 2];
+    let resolutionIndex = resolutions.indexOf(window.renderScale);
+    if (resolutionIndex < 0) resolutionIndex = 0;
+    const resolutionLabel = this.add.bitmapText(0, 5, "goldFont", "Resolution", 34).setOrigin(0.5);
+    const resolutionValue = this.add.bitmapText(0, 65, "bigFont", "", 43).setOrigin(0.5);
+    const updateResolution = () => {
+      const scale = resolutions[resolutionIndex];
+      resolutionValue.setText(`${Math.round(screenWidth * scale)}x${Math.round(screenHeight * scale)}`);
+    };
+    updateResolution();
+    const resolutionLeft = this.add.image(-200, 65, "GJ_GameSheet03", "GJ_arrow_01_001.png").setInteractive().setScale(0.8);
+    const resolutionRight = this.add.image(200, 65, "GJ_GameSheet03", "GJ_arrow_01_001.png").setFlipX(true).setInteractive().setScale(0.8);
+    inner.add([resolutionLabel, resolutionValue, resolutionLeft, resolutionRight]);
+    this._makeBouncyButton(resolutionLeft, 0.8, () => {
+      resolutionIndex = (resolutionIndex - 1 + resolutions.length) % resolutions.length;
+      updateResolution();
+    });
+    this._makeBouncyButton(resolutionRight, 0.8, () => {
+      resolutionIndex = (resolutionIndex + 1) % resolutions.length;
+      updateResolution();
+    });
 
     const makeButton = (x, text, action) => {
       const button = this.add.nineslice(x, panelHeight / 2 - 45, "GJ_button01", null, 210, 60, 28, 28, 28, 28)
@@ -5698,11 +5720,11 @@ _buildSettingsPopup() {
     };
 
     this._makeBouncyButton(close, 0.75, closePopup);
-    this._makeBouncyButton(leftArrow, 1, () => {
+    this._makeBouncyButton(leftArrow, 0.8, () => {
       selectedIndex = (selectedIndex - 1 + qualityOptions.length) % qualityOptions.length;
       updateValue();
     });
-    this._makeBouncyButton(rightArrow, 1, () => {
+    this._makeBouncyButton(rightArrow, 0.8, () => {
       selectedIndex = (selectedIndex + 1) % qualityOptions.length;
       updateValue();
     });
@@ -5711,6 +5733,7 @@ _buildSettingsPopup() {
     makeButton(120, "APPLY", () => {
       window.graphicsQuality = qualityOptions[selectedIndex].id;
       localStorage.setItem("gd_graphics_quality", window.graphicsQuality);
+      localStorage.setItem("gd_render_scale", String(resolutions[resolutionIndex]));
       this._saveSettings();
       window.location.reload();
     });
