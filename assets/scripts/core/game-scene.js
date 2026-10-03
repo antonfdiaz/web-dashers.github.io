@@ -587,25 +587,33 @@ class GameScene extends Phaser.Scene {
     ];
     const _socialScale = 0.75;
     this._socialIcons = _socialIconDefs.map((def, index) => {
-    const icon = this.add.image(0, 0, "GJ_GameSheet03", def.frame)
-      .setScrollFactor(0)
-      .setDepth(30)
-      .setScale(_socialScale)
-      .setAngle(def.angle)
-      .setFlipX(!!def.flipX);
+      const icon = this.add.image(0, 0, "GJ_GameSheet03", def.frame)
+        .setScrollFactor(0)
+        .setDepth(30)
+        .setScale(_socialScale)
+        .setAngle(def.angle)
+        .setFlipX(!!def.flipX);
 
-    if (!def.frame || def.frame.trim() === "") {
-      icon.setVisible(false);
-      icon.setActive(false);
-      return icon; 
-    }
-    icon.setInteractive();
-    this._makeBouncyButton(icon, _socialScale, () => {
-      window.open(def.url, "_blank");
-    }, () => this._menuActive);
+      if (!def.frame || def.frame.trim() === "") {
+        icon.setVisible(false);
+        icon.setActive(false);
+        return icon; 
+      }
+      icon.setInteractive();
+      this._makeBouncyButton(icon, _socialScale, () => {
+        window.open(def.url, "_blank");
+      }, () => this._menuActive);
 
-    return icon;
-  });
+      return icon;
+    });
+  
+    this._handleEditorPointerDown = pointer => {
+      if (!window.isEditor || window.isEditorPause) return;
+
+      this._hitObjects = this.input.hitTestPointer(pointer);
+    };
+
+    this.input.on("pointerdown",this._handleEditorPointerDown,this);
 
     this._copyrightText = this.add.text(0, 630, "© 2026 RobTop Games · geometrydash.com", {
       fontSize: "14px",
@@ -8179,7 +8187,6 @@ _showwippopup() {
 
         if (window.isEditorPause) return;
         const pointer = this.input.activePointer;
-        this._hitObjects = this.input.hitTestPointer(pointer);
         this._levelEditor._handleEditorCamera(deltaTime); 
         this._levelEditor._updateEditorGrid(); 
         if (pointer.isDown && !this._isDraggingSlider) {
