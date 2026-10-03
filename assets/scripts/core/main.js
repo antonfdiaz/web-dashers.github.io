@@ -60,7 +60,26 @@ const phaserConfig = {
   },
   scene: [BootScene, GameScene]
 };
-new Phaser.Game(phaserConfig);
+const webDashersGame = new Phaser.Game(phaserConfig);
+
+window.getPerformanceInfo = () => {
+  const game = webDashersGame;
+  const scene = game.scene.getScene("GameScene");
+  const gl = game.renderer.gl;
+  const debug = gl?.getExtension("WEBGL_debug_renderer_info");
+  const level = scene?._level;
+  return {
+    fps: Math.round(game.loop.actualFps),
+    renderer: game.renderer.type === Phaser.WEBGL ? "WebGL" : "Canvas",
+    gpu: gl ? gl.getParameter(debug ? debug.UNMASKED_RENDERER_WEBGL : gl.RENDERER) : null,
+    canvas: [game.canvas.width, game.canvas.height],
+    level: window.currentlevel?.[1],
+    ldm: !!window.enableLDM,
+    objects: level?.objects.length,
+    activeLevelEmitters: level?._levelParticleEmitters.filter(emitter => emitter.active).length,
+    browser: navigator.userAgent
+  };
+};
 
 window.clearGameCache = () => {
   if (window.gameCache) {

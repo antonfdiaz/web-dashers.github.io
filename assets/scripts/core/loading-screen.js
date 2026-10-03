@@ -310,12 +310,8 @@ class BootScene extends Phaser.Scene {
         this.load.image("groundSquare_" + paddedIndex + "_2_001.png", "assets/game-ground/groundSquare_" + i + "_2_001.png");
       }
 
-      for (let i = 1; i < 60; i++) {
-        let index = i - 1;
-        i = String(i);
-        if (i.length < 2) i = "0" + i;
-        this.load.image("game_bg_" + index, "assets/game-bg/game_bg_" + i + "_001-hd.png");
-      }
+      // Other backgrounds are loaded when a level or the editor selects them.
+      this.load.image("game_bg_0", "assets/game-bg/game_bg_01_001-hd.png");
 
       this.load.audio("menu_music", "assets/music/menuLoop.mp3");
       this.load.audio("StayInsideMe", "assets/music/StayInsideMe.mp3");

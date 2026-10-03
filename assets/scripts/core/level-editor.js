@@ -2772,9 +2772,7 @@ class LevelEditor {
 
     const registerColor = (spr, ch) => {
       if (ch > 0 && objectDef?.can_color !== false && spr && !spr._isSaw) {
-        spr._eeColorChannel = ch;
-        if (!this._level._colorChannelSprites[ch]) this._level._colorChannelSprites[ch] = [];
-        this._level._colorChannelSprites[ch].push(spr);
+        this._level._registerColorChannelSprite(spr, ch);
       }
     };
 
@@ -3350,14 +3348,7 @@ class LevelEditor {
 
         const bgKey = "game_bg_" + getBackgroundTextureIndex(numericValue);
 
-        if (this._bg && this.textures.exists(bgKey)) {
-            this._bg.setTexture(bgKey);
-            const newBgH = this.textures.get(bgKey).source?.[0]?.height;
-
-            if (newBgH) {
-                this._bgInitY = newBgH - screenHeight - o;
-            }
-        }
+        if (this._bg) this._applyMirroredBackgroundTexture(bgKey);
     } else if (key === "kA7") {
         window._groundId = getGroundTextureId(numericValue);
 

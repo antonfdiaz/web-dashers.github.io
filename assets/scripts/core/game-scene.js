@@ -393,6 +393,7 @@ class GameScene extends Phaser.Scene {
     });
   }
   create() {
+    this._startAfterBackgroundLoad = false;
     this._bgSpeedX = 0.1;
     this._bgSpeedY = 0.1;
     this._menuCameraX = -centerX;
@@ -457,9 +458,7 @@ class GameScene extends Phaser.Scene {
     window._groundId = getGroundTextureId(_groundRaw);
 
     const _bgKey = "game_bg_" + getBackgroundTextureIndex(_bgGdId);
-    if (this.textures.exists(_bgKey)) {
-      this._applyMirroredBackgroundTexture(_bgKey);
-    }
+    this._applyMirroredBackgroundTexture(_bgKey);
     this._level.applyGroundTexture();
     if (this._level._initialColors) {
       for (let chId in this._level._initialColors) {
@@ -501,6 +500,7 @@ class GameScene extends Phaser.Scene {
     this._level.additiveContainer.setVisible(false);
     this._level.container.setVisible(false);
     this._level.topContainer.setVisible(false);
+    this._level._updateLevelParticleVisibility(this._cameraX);
     this._attempts = parseInt(localStorage.getItem("gd_totalAttempts") || "1", 10);
     this._bestPercent = 0;
     this._lastPercent = 0;
@@ -6950,6 +6950,11 @@ _showwippopup() {
     if (!this._menuActive) {
       return;
     }
+    if (this._requestedBackgroundKey && !this.textures.exists(this._requestedBackgroundKey) &&
+        this._pendingBackgroundLoads?.has(this._requestedBackgroundKey)) {
+      this._startAfterBackgroundLoad = true;
+      return;
+    }
     const _instant = !!this._instantLevelStart;
     this._instantLevelStart = false;
     const _dismiss = (target, tweenProps, cleanup) => {
@@ -7885,7 +7890,53 @@ _showwippopup() {
     }
   }
 
+  _loadBackgroundTexture(textureKey) {
+    const match = /^game_bg_(\d+)$/.exec(textureKey);
+    const index = match ? Number(match[1]) : -1;
+    if (index < 0 || index > 58) return;
+    this._pendingBackgroundLoads ||= new Set();
+    if (this._pendingBackgroundLoads.has(textureKey)) return;
+    this._pendingBackgroundLoads.add(textureKey);
+    const completeEvent = "filecomplete-image-" + textureKey;
+    const cleanup = () => {
+      this.load.off(completeEvent, onComplete);
+      this.load.off("loaderror", onError);
+      this.events.off("shutdown", cleanup);
+      this._pendingBackgroundLoads.delete(textureKey);
+    };
+    const onComplete = () => {
+      cleanup();
+      // Rapid editor selections must not let an older request replace the newest one.
+      if (this._requestedBackgroundKey !== textureKey || !this._bg?.scene) return;
+      this._applyMirroredBackgroundTexture(textureKey);
+      if (this._startAfterBackgroundLoad) {
+        this._startAfterBackgroundLoad = false;
+        this._startGame();
+      }
+    };
+    const onError = (file) => {
+      if (file.key !== textureKey) return;
+      cleanup();
+      if (this._requestedBackgroundKey === textureKey && this._startAfterBackgroundLoad) {
+        this._startAfterBackgroundLoad = false;
+        this._requestedBackgroundKey = null;
+        this._startGame();
+      }
+    };
+    this.load.once(completeEvent, onComplete);
+    this.load.on("loaderror", onError);
+    this.events.once("shutdown", cleanup);
+    const id = String(index + 1).padStart(2, "0");
+    this.load.image(textureKey, "assets/game-bg/game_bg_" + id + "_001-hd.png");
+    if (!this.load.isLoading()) this.load.start();
+  }
+
   _applyMirroredBackgroundTexture(textureKey) {
+    this._requestedBackgroundKey = textureKey;
+    if (!this.textures.exists(textureKey)) {
+      this._loadBackgroundTexture(textureKey);
+      return;
+    }
     const texture = this.textures.get(textureKey);
     const source = texture?.source?.[0];
     const sourceHeight = source?.height || source?.image?.height || source?.image?.naturalHeight || 0;
@@ -8311,7 +8362,7 @@ _showwippopup() {
     if (!window.enableLDM) {
       window._animTimer += deltaTime;
       for (let _as of window._animatedSprites) {
-        if (!_as || !_as.active || !_as.visible) continue;
+        if (!_as || !_as.active || !_as.visible || !this._level.isVisualSpriteNearCamera(_as, this._cameraX)) continue;
         if (window._animTimer - (_as._lastAnimSwap || 0) >= _as._animInterval) {
           _as._lastAnimSwap = window._animTimer;
           _as._animIdx = (_as._animIdx + 1) % _as._animFrames.length;
@@ -8329,7 +8380,7 @@ _showwippopup() {
     if (this._level && this._level._sawSprites && !window.enableLDM) {
       const sawTimer = (window._animTimer || 0) / 1000;
       for (let _saw of this._level._sawSprites) {
-        if (!_saw || !_saw.active || !_saw.visible) continue;
+        if (!_saw || !_saw.active || !_saw.visible || !this._level.isVisualSpriteNearCamera(_saw, this._cameraX)) continue;
         const baseSpeed = _saw._Sawrotationspeed ?? 0.0034;
         let sawRotationSpeed = baseSpeed;
         if (_saw._SawRandom1 !== undefined) {
@@ -8341,12 +8392,12 @@ _showwippopup() {
     if (this._level && this._level._orbSprites) {
       const gravityGuideRotation = (this._state?.gravityFlipped ? Math.PI : 0);
       for (let _oSpr of this._level._orbSprites) {
-        if (!_oSpr || !_oSpr.active || !_oSpr._eeOrbGuide || !_oSpr._OrbGuideGrav) continue;
+        if (!_oSpr || !_oSpr.active || !_oSpr._eeOrbGuide || !_oSpr._OrbGuideGrav || !this._level.isVisualSpriteNearCamera(_oSpr, this._cameraX)) continue;
         const baseRotation = Number.isFinite(_oSpr._OrbGuideRotation) ? _oSpr._OrbGuideRotation : 0;
         _oSpr.rotation = baseRotation + gravityGuideRotation;
       }
     }
-    this._level.updateAudioScale(this._audio.getMeteringValue());
+    this._level.updateAudioScale(this._audio.getMeteringValue(), this._cameraX, screenWidth);
     if (!this._orbGfx) {
       this._orbGfx = this.add.graphics().setDepth(54).setBlendMode(S);
     }
