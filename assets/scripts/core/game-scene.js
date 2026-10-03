@@ -6617,7 +6617,7 @@ _showwippopup() {
     bounceContainer.add(closeBtn);
     this._expandHitArea(closeBtn, 2);
     this._makeBouncyButton(closeBtn, 0.8, () => this._closeUpdateLogPopup());
-    const title = this.add.bitmapText(0, -124, "goldFont", "BETA (EXPECT BUGS)", 33).setOrigin(0.5, 0.55).setTint(0xff5555);
+    const title = this.add.bitmapText(0, -124, "bigFont", "BETA (EXPECT BUGS)", 33).setOrigin(0.5, 0.55).setTint(0xff6666);
     bounceContainer.add(title);
     const scrollAreaW = 420;
     const scrollAreaH = 230;
@@ -6642,7 +6642,7 @@ _showwippopup() {
       { text: "- Faster initial loading", scale: 0.7, color: 0xaaddff },
       { text: "- Added level culling", scale: 0.7, color: 0xaaddff },
       { text: "- Added Graphics quality settings", scale: 0.62, color: 0xaaddff },
-      { text: "- Changed header color", scale: 0.7, color: 0xaaddff },
+      { text: "- Made Create menu more accurate", scale: 0.62, color: 0xaaddff },
       { text: "=== t0nchi7 ===", scale: 0.7, color: 0xffffff },
     ]; 
     let yPos = 0;
