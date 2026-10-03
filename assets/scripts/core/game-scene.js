@@ -6976,6 +6976,11 @@ _showwippopup() {
     this._practiceBestPercent = parseFloat(localStorage.getItem("practiceBestPercent_" + (window.currentlevel[2] || "level_1")) || "0");
     
     this._menuActive = false;
+    // The menu may have changed these tints while the background was loading.
+    // Restore them before slide-in, which does not run the gameplay color update.
+    this._bg.setTint(this._colorManager.getHex(fs));
+    this._level.setGroundColor(this._colorManager.getHex(gs));
+    this._level.setGround2Color?.(this._colorManager.getHex(1009));
     this._practiceBypassPending = false;
     this._slideIn = true;
     if (this._menuGlitter) {
@@ -8007,6 +8012,11 @@ _showwippopup() {
     return _0xd8019e * 60;
   }
   update(_0x54fa47, deltaTime) {
+    // A requested level start must not run the menu's rainbow animation while loading.
+    if (this._startAfterBackgroundLoad) {
+      this._deltaBuffer = 0;
+      return;
+    }
     if (window.isEditor) {
         if (this._editorPlaytestActive && !this._editorPlaytestPaused) {
             this._levelEditor._updateEditorPlaytest(deltaTime);
