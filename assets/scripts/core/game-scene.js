@@ -392,6 +392,41 @@ class GameScene extends Phaser.Scene {
       key: "GameScene"
     });
   }
+  preload() {
+    const levelKey = window.currentlevel?.[2];
+    const hasLevel = this.cache.text.exists(levelKey) ||
+      (window._onlineLevelString && window._onlineLevelId === levelKey);
+    if (!hasLevel && !window.isEditor && !this.game.registry.get("autoStartGame")) return;
+
+    // Gameplay effects are unnecessary for the initial menu. Phaser waits for
+    // these files before create(), so level objects always find their textures.
+    let queuedAssets = false;
+    for (const [key, file] of [
+      ["PixelSheet_01-hd", "PixelSheet_01"],
+      ["FireSheet_01-hd", "FireSheet_01-hd"],
+      ["GJ_ParticleSheet-uhd", "GJ_ParticleSheet"]
+    ]) {
+      if (!this.textures.exists(key)) {
+        queuedAssets = true;
+        this.load.atlas(key, `assets/sheets/${file}.png`, `assets/sheets/${file}.json`);
+      }
+    }
+    if (!this.cache.audio.exists("StayInsideMe")) {
+      queuedAssets = true;
+      this.load.audio("StayInsideMe", "assets/music/StayInsideMe.mp3");
+    }
+    if (queuedAssets) {
+      const label = this.add.bitmapText(screenWidth / 2, screenHeight / 2, "goldFont", "Loading Level Assets...", 30).setOrigin(0.5);
+      const cleanup = () => {
+        label.destroy();
+        this.load.off("complete", cleanup);
+        this.events.off("shutdown", cleanup);
+      };
+      this.load.once("complete", cleanup);
+      this.events.once("shutdown", cleanup);
+    }
+  }
+
   create() {
     this._startAfterBackgroundLoad = false;
     this._bgSpeedX = 0.1;
