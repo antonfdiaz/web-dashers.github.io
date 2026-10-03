@@ -106,6 +106,7 @@ class LevelEditor {
     this._editorPlaytestSavedView = null;
     this._editorPlaytestPauseView = null;
     this._editorPlaytestLastTrailPoint = null;
+    this._editorFurthestX = null;
     this.input.on('pointerdown', (pointer) => {
         if (this._editorPlaytestActive && !this._editorPlaytestPaused) return;
         this._clickStartPos.x = pointer.x;
@@ -2107,6 +2108,7 @@ class LevelEditor {
 
         saveObj.x += dx / 2;
         saveObj.y -= dy / 2;
+        this._editorFurthestX = null;
         if (saveObj._raw) {
             saveObj._raw["2"] = String(saveObj.x);
             saveObj._raw["3"] = String(saveObj.y);
@@ -2491,6 +2493,7 @@ class LevelEditor {
         delete clone._eeObjectId;
 
         window.levelObjects.push(clone);
+        this._editorFurthestX = null;
         this._level._spawnObject(clone);
 
         const newObjectId = Number.isInteger(clone._eeObjectId)
@@ -2580,6 +2583,7 @@ class LevelEditor {
         for (const saveIndex of saveIndexes) {
             window.levelObjects[saveIndex] = null;
         }
+        this._editorFurthestX = null;
     }
 
     this._refreshEditorCollisionCaches();
@@ -2915,6 +2919,7 @@ class LevelEditor {
     }
 
     window.levelObjects.push(saveData);
+    this._editorFurthestX = null;
     this._level._spawnObject(saveData);
 
     const placedIndex = Math.max(0, (this._level._nextObjectId || 1) - 1);
@@ -3064,6 +3069,7 @@ class LevelEditor {
 
     if (Array.isArray(window.levelObjects) && saveIndex !== -1) {
         window.levelObjects[saveIndex] = null;
+        this._editorFurthestX = null;
     }
 
     this._refreshEditorCollisionCaches();
