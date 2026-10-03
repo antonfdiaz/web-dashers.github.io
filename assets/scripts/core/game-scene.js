@@ -6647,6 +6647,7 @@ _showwippopup() {
       { text: "- Added level culling", scale: 0.7, color: 0xaaddff },
       { text: "- Added Graphics quality settings", scale: 0.62, color: 0xaaddff },
       { text: "- Made Create menu more accurate", scale: 0.62, color: 0xaaddff },
+      { text: "- Small editor optimizations", scale: 0.7, color: 0xaaddff },
       { text: "=== t0nchi7 ===", scale: 0.7, color: 0xffffff },
     ]; 
     let yPos = 0;
