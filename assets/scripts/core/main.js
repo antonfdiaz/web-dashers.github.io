@@ -42,7 +42,10 @@ const phaserConfig = {
   type: Phaser.AUTO,
   width: screenWidth,
   height: screenHeight,
-  resolution: 1,
+  pixelArt: window.graphicsQuality === "sharp",
+  antialias: window.graphicsQuality !== "sharp",
+  antialiasGL: window.graphicsQuality !== "sharp",
+  roundPixels: window.graphicsQuality === "sharp",
   fps: {
     smoothStep: true
   },

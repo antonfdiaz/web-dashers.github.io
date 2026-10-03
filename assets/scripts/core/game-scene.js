@@ -4176,7 +4176,7 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
       }
     });
 
-    const downloadsoundtrack = this.add.bitmapText(cx, 585, "bigFont", "Download the soundtracks", 56).setScrollFactor(0).setDepth(155).setOrigin(0.5, 0.5).setScale(0.52).setInteractive();
+    const downloadsoundtrack = this.add.bitmapText(cx, 585, "bigFont", "Download the soundtrack", 56).setScrollFactor(0).setDepth(155).setOrigin(0.5, 0.5).setScale(0.52).setInteractive();
         this._makeBouncyButton(downloadsoundtrack, 0.52, () => { this._buildsongspopup(1); }); 
 
     const arrowL = this.add.image(55, cy - 25, "GJ_GameSheet03", "navArrowBtn_001.png").setScrollFactor(0).setDepth(154).setScale(1.1).setFlipX(true).setInteractive();
@@ -5600,10 +5600,95 @@ _buildSettingsPopup() {
         cullDistance: window.cullDistance,
         settingInfoText: window.settingInfoText || {},
         enableLDM: window.enableLDM,
+        graphicsQuality: window.graphicsQuality || "smooth",
     };
     localStorage.setItem("gd_settings", JSON.stringify(settings));
     localStorage.setItem("gd_useDirectInternet", String(!!window.useDirectInternet));
+    localStorage.setItem("gd_graphics_quality", window.graphicsQuality || "smooth");
   }
+  _buildGraphicsPopup() {
+    if (this._graphicsPopup) return;
+
+    const centerX = screenWidth / 2;
+    const centerY = screenHeight / 2;
+    const panelWidth = 760;
+    const panelHeight = 360;
+    const qualityOptions = [
+      { id: "smooth", label: "SMOOTH" },
+      { id: "sharp", label: "SHARP" }
+    ];
+
+    this._graphicsPopup = this.add.container(0, 0).setScrollFactor(0).setDepth(260);
+    const dim = this.add.rectangle(centerX, centerY, screenWidth, screenHeight, 0, 100 / 255).setInteractive().setAlpha(0);
+    const inner = this.add.container(centerX, centerY).setScale(0);
+    this._graphicsPopup.add([dim, inner]);
+
+    const corner = 0.325 * this.textures.get("GJ_square01").source[0].width;
+    inner.add(this.add.nineslice(0, 0, "GJ_square01", null, panelWidth, panelHeight, corner, corner, corner, corner).setOrigin(0.5));
+
+    const close = this.add.image(-panelWidth / 2 + 10, -panelHeight / 2 + 10, "GJ_WebSheet", "GJ_closeBtn_001.png")
+      .setScale(0.8)
+      .setInteractive();
+    inner.add(close);
+
+    const title = this.add.bitmapText(0, -panelHeight / 2 + 40, "bigFont", "Graphics", 58).setOrigin(0.5);
+    const label = this.add.bitmapText(0, -55, "goldFont", "Texture Quality", 34).setOrigin(0.5);
+    const value = this.add.bitmapText(0, 20, "bigFont", "", 43).setOrigin(0.5);
+    inner.add([title, label, value]);
+
+    let selectedIndex = qualityOptions.findIndex(option => option.id === window.graphicsQuality);
+    if (selectedIndex < 0) selectedIndex = 0;
+    const updateValue = () => value.setText(qualityOptions[selectedIndex].label);
+    updateValue();
+
+    const leftArrow = this.add.image(-220, 20, "GJ_GameSheet03", "GJ_arrow_01_001.png").setInteractive();
+    const rightArrow = this.add.image(220, 20, "GJ_GameSheet03", "GJ_arrow_01_001.png").setFlipX(true).setInteractive();
+    inner.add([leftArrow, rightArrow]);
+
+    const makeButton = (x, text, action) => {
+      const button = this.add.nineslice(x, panelHeight / 2 - 45, "GJ_button01", null, 210, 60, 28, 28, 28, 28)
+        .setInteractive();
+      const buttonText = this.add.bitmapText(x, panelHeight / 2 - 50, "goldFont", text, 40).setOrigin(0.5);
+      inner.add([button, buttonText]);
+      this._makeCompositeBouncyButton(button, [button, buttonText], 1, action);
+    };
+
+    const closePopup = () => {
+      if (!this._graphicsPopup) return;
+      this.tweens.killTweensOf(inner);
+      this.tweens.killTweensOf(dim);
+      this._graphicsPopup.destroy();
+      this._graphicsPopup = null;
+    };
+
+    this._makeBouncyButton(close, 0.75, closePopup);
+    this._makeBouncyButton(leftArrow, 1, () => {
+      selectedIndex = (selectedIndex - 1 + qualityOptions.length) % qualityOptions.length;
+      updateValue();
+    });
+    this._makeBouncyButton(rightArrow, 1, () => {
+      selectedIndex = (selectedIndex + 1) % qualityOptions.length;
+      updateValue();
+    });
+
+    makeButton(-120, "BACK", closePopup);
+    makeButton(120, "APPLY", () => {
+      window.graphicsQuality = qualityOptions[selectedIndex].id;
+      localStorage.setItem("gd_graphics_quality", window.graphicsQuality);
+      this._saveSettings();
+      window.location.reload();
+    });
+
+    this.tweens.add({ targets: dim, alpha: 1, duration: 250, ease: "Linear" });
+    this.tweens.add({
+      targets: inner,
+      scale: { from: 0, to: 1 },
+      duration: 660,
+      ease: "Elastic.Out",
+      easeParams: [1, 0.6]
+    });
+  }
+
   _loadSettings() {
     const saved = localStorage.getItem("gd_settings");
     const defaults = {
@@ -6500,7 +6585,7 @@ _showwippopup() {
     bounceContainer.add(closeBtn);
     this._expandHitArea(closeBtn, 2);
     this._makeBouncyButton(closeBtn, 0.8, () => this._closeUpdateLogPopup());
-    const title = this.add.bitmapText(0, -124, "bigFont", "BETA (EXPECT BUGS)", 33).setOrigin(0.5, 0.55).setTint(0xff6666);
+    const title = this.add.bitmapText(0, -124, "goldFont", "BETA (EXPECT BUGS)", 33).setOrigin(0.5, 0.55).setTint(0xff5555);
     bounceContainer.add(title);
     const scrollAreaW = 420;
     const scrollAreaH = 230;
@@ -6520,9 +6605,13 @@ _showwippopup() {
     */
     const updateEntries = [
       { text: "Update Log", scale: 1, font: "goldFont" },
-      { text: "Sorry for the 10 hour downtime\ni forgot to change the proxy\nurl because i changed the\nsubdomain - rohanis0000", scale: 0.7, color: 0xaaddff },
-      { text: "To anyone who is wondering\nwhy online features don't work,\nthe worker is constantly being\nused and its request limit\nis hit daily in a short time\ndue to many users using\nthe online levels feature.\nThis has hopefully been\nfixed now with this update.\n- rohanis0000", scale: 0.7, color: 0xaaddff },
-      { text: "Added 2 new proxies to fall back\nto when ones request limit is\n hit to allow you to still\nbe able to use online features.", scale: 0.65 }
+      { text: "- Improved alpha & color updates", scale: 0.62, color: 0xaaddff },
+      { text: "- Faster background loading", scale: 0.7, color: 0xaaddff },
+      { text: "- Faster initial loading", scale: 0.7, color: 0xaaddff },
+      { text: "- Added level culling", scale: 0.7, color: 0xaaddff },
+      { text: "- Added Graphics quality settings", scale: 0.62, color: 0xaaddff },
+      { text: "- Changed header color", scale: 0.7, color: 0xaaddff },
+      { text: "=== t0nchi7 ===", scale: 0.7, color: 0xffffff },
     ]; 
     let yPos = 0;
     const lineItems = [];
@@ -9888,7 +9977,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
     _makeSettingsBtn(_sColL, _sRow1Y, "Account",    _sBtnW2, false, null);
     _makeSettingsBtn(_sColR, _sRow1Y, "How To Play", _sBtnW2, true, () => { this._buildHowToPlayPopup(); });
     _makeSettingsBtn(_sColL, _sRow2Y, "Options",    _sBtnW2, true,  () => { this._buildSettingsPopup(); });
-    _makeSettingsBtn(_sColR, _sRow2Y, "Graphics",   _sBtnW2, false, null);
+    _makeSettingsBtn(_sColR, _sRow2Y, "Graphics",   _sBtnW2, true,  () => { this._buildGraphicsPopup(); });
     _makeSettingsBtn(_sCol3L, _sRow3Y, "Rate",      _sBtnW3, true, () => { this._redirectRate(); });
     _makeSettingsBtn(_sCol3M, _sRow3Y, "Songs",     _sBtnW3, true, () => { this._hideSettingsScreen(() => this.time.delayedCall(150, () => this._buildsongspopup())); });
     _makeSettingsBtn(_sCol3R, _sRow3Y, "Help",      _sBtnW3, true, () => { this._hideSettingsScreen(() => this.time.delayedCall(150, () => this._buildhelppopup())); });
