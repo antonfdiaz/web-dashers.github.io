@@ -398,8 +398,8 @@ class GameScene extends Phaser.Scene {
       (window._onlineLevelString && window._onlineLevelId === levelKey);
     if (!hasLevel && !window.isEditor && !this.game.registry.get("autoStartGame")) return;
 
-    // Gameplay effects are unnecessary for the initial menu. Phaser waits for
-    // these files before create(), so level objects always find their textures.
+    //gameplay effects are unnecessary for the initial menu. phaser waits for
+    //these files before create(), so level objs always find their textures
     let queuedAssets = false;
     for (const [key, file] of [
       ["PixelSheet_01-hd", "PixelSheet_01"],
@@ -416,7 +416,7 @@ class GameScene extends Phaser.Scene {
       this.load.audio("StayInsideMe", "assets/music/StayInsideMe.mp3");
     }
     if (queuedAssets) {
-      const label = this.add.bitmapText(screenWidth / 2, screenHeight / 2, "goldFont", "Loading Level Assets...", 30).setOrigin(0.5);
+      const label = this.add.bitmapText(screenWidth-100, screenHeight-30, "bigFont", "Loading...", 30).setOrigin(0.5);
       const cleanup = () => {
         label.destroy();
         this.load.off("complete", cleanup);
@@ -1389,17 +1389,13 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
         const rawData = localStorage.getItem("created_levels");
         const createdLevels = rawData ? JSON.parse(rawData) : [];
 
-        // Geometry Dash's level browser keeps its border art outside the main
-        // panel. These pieces are part of the UI chrome, so keep them in this
-        // menu container and let the panel draw over their inner edges.
-        const borderBottomLeft = this.add.image(0, sh, "GJ_GameSheet03", "GJ_sideArt_001.png")
+        //add side art
+        const sideArtBL = this.add.image(0, sh, "GJ_GameSheet03", "GJ_sideArt_001.png")
             .setScrollFactor(0).setOrigin(0, 1);
-        const borderBottomRight = this.add.image(sw, sh, "GJ_GameSheet03", "GJ_sideArt_001.png")
+        const sideArtBR = this.add.image(sw, sh, "GJ_GameSheet03", "GJ_sideArt_001.png")
             .setScrollFactor(0).setOrigin(1, 1).setFlipX(true);
-        container.add([
-            borderBottomLeft,
-            borderBottomRight
-        ]);
+
+        container.add([sideArtBL,sideArtBR]);
 
         createdLevels.sort((a, b) => {
             const idA = parseInt(a.createdId.replace("local_", "")) || 0;
@@ -5643,7 +5639,7 @@ _buildSettingsPopup() {
 
     const centerX = screenWidth / 2;
     const centerY = screenHeight / 2;
-    const panelWidth = 760;
+    const panelWidth = 700;
     const panelHeight = 360;
     const qualityOptions = [
       { id: "smooth", label: "SMOOTH" },
@@ -5673,14 +5669,14 @@ _buildSettingsPopup() {
     const updateValue = () => value.setText(qualityOptions[selectedIndex].label);
     updateValue();
 
-    const leftArrow = this.add.image(-220, 20, "GJ_GameSheet03", "GJ_arrow_01_001.png").setInteractive();
-    const rightArrow = this.add.image(220, 20, "GJ_GameSheet03", "GJ_arrow_01_001.png").setFlipX(true).setInteractive();
+    const leftArrow = this.add.image(-200, 20, "GJ_GameSheet03", "GJ_arrow_01_001.png").setInteractive().setScale(0.8);
+    const rightArrow = this.add.image(200, 20, "GJ_GameSheet03", "GJ_arrow_01_001.png").setFlipX(true).setInteractive().setScale(0.8);
     inner.add([leftArrow, rightArrow]);
 
     const makeButton = (x, text, action) => {
       const button = this.add.nineslice(x, panelHeight / 2 - 45, "GJ_button01", null, 210, 60, 28, 28, 28, 28)
         .setInteractive();
-      const buttonText = this.add.bitmapText(x, panelHeight / 2 - 50, "goldFont", text, 40).setOrigin(0.5);
+      const buttonText = this.add.bitmapText(x, panelHeight / 2 - 50, "goldFont", text, 48).setOrigin(0.5);
       inner.add([button, buttonText]);
       this._makeCompositeBouncyButton(button, [button, buttonText], 1, action);
     };
@@ -7132,8 +7128,8 @@ _showwippopup() {
     this._practiceBestPercent = parseFloat(localStorage.getItem("practiceBestPercent_" + (window.currentlevel[2] || "level_1")) || "0");
     
     this._menuActive = false;
-    // The menu may have changed these tints while the background was loading.
-    // Restore them before slide-in, which does not run the gameplay color update.
+    //the menu may have changed tints while the bg was loading
+    //restore them before slide in, which doesnt run the gameplay color update
     this._bg.setTint(this._colorManager.getHex(fs));
     this._level.setGroundColor(this._colorManager.getHex(gs));
     this._level.setGround2Color?.(this._colorManager.getHex(1009));
@@ -8067,7 +8063,7 @@ _showwippopup() {
     };
     const onComplete = () => {
       cleanup();
-      // Rapid editor selections must not let an older request replace the newest one.
+      //fast editor selections must not let an older request replace the newest one
       if (this._requestedBackgroundKey !== textureKey || !this._bg?.scene) return;
       this._applyMirroredBackgroundTexture(textureKey);
       if (this._startAfterBackgroundLoad) {
@@ -8168,7 +8164,7 @@ _showwippopup() {
     return _0xd8019e * 60;
   }
   update(_0x54fa47, deltaTime) {
-    // A requested level start must not run the menu's rainbow animation while loading.
+    //requested level start must not run the menu's rainbow animation while loading
     if (this._startAfterBackgroundLoad) {
       this._deltaBuffer = 0;
       return;
